@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: kube-apiserver
+    env: go
+    plan: free
+    buildCommand: go build -ldflags="-s -w" -o bin/kube-apiserver ./cmd/apiserver
+    startCommand: ./bin/kube-apiserver -memory -addr :10000
+    envVars:
+      - key: PORT
+        value: 10000
+    healthCheckPath: /healthz
+    autoDeploy: true
+
+  - type: worker
+    name: kube-controller
+    env: go
+    plan: free
+    buildCommand: go build -ldflags="-s -w" -o bin/kube-controller ./cmd/controller
+    startCommand: ./bin/kube-controller -memory
+    autoDeploy: true
+
+  - type: worker
+    name: kube-agent
+    env: go
+    plan: free
+    buildCommand: go build -ldflags="-s -w" -o bin/kube-agent ./cmd/agent
+    startCommand: ./bin/kube-agent -memory -mock-runtime
+    autoDeploy: true

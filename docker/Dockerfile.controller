@@ -1,0 +1,12 @@
+FROM golang:1.24-alpine AS builder
+ENV GOTOOLCHAIN=auto
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -trimpath -o /kube-controller ./cmd/controller
+
+FROM gcr.io/distroless/static:nonroot
+COPY --from=builder /kube-controller /kube-controller
+USER nonroot:nonroot
+ENTRYPOINT ["/kube-controller"]
