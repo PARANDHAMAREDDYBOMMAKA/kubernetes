@@ -1,4 +1,4 @@
-.PHONY: all build clean test run-apiserver run-controller run-agent run-scheduler
+.PHONY: all build clean test run-apiserver run-controller run-agent run-scheduler dev-infra dev-infra-down
 
 BINARY_DIR := bin
 GO_FLAGS := -ldflags="-s -w" -trimpath
@@ -61,3 +61,9 @@ docker-push:
 	docker push kube-controller:latest
 	docker push kube-agent:latest
 	docker push kube-scheduler:latest
+
+dev-infra:
+	docker compose up -d mongodb etcd
+
+dev-infra-down:
+	docker compose down

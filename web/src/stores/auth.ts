@@ -82,10 +82,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.persist()
       if (redirect) {
-        // avoid circular import; navigate via location if router already past init
-        import('@/router').then(({ default: router }) => {
-          router.push({ name: 'login' })
-        })
+        // Callers that need to navigate should do so themselves. We just clear state.
       }
     }
   }

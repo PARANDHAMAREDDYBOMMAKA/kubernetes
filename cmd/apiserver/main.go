@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,8 +16,12 @@ import (
 	"time"
 
 	"github.com/parandhamareddybommaka/kube/pkg/api/handlers"
+	"github.com/parandhamareddybommaka/kube/pkg/api/kaas"
 	"github.com/parandhamareddybommaka/kube/pkg/api/middleware"
 	"github.com/parandhamareddybommaka/kube/pkg/api/types"
+	kaasdb "github.com/parandhamareddybommaka/kube/pkg/db"
+	"github.com/parandhamareddybommaka/kube/pkg/lbmgr"
+	"github.com/parandhamareddybommaka/kube/pkg/provisioner"
 	"github.com/parandhamareddybommaka/kube/pkg/scheduler"
 	"github.com/parandhamareddybommaka/kube/pkg/store"
 )
@@ -70,6 +75,38 @@ func main() {
 	handler := handlers.New(dataStore, sched)
 	mux := http.NewServeMux()
 
+	// KaaS: connect to MongoDB (non-fatal on failure).
+	if _, err := kaasdb.Connect(ctx); err != nil {
+		slog.Warn("mongodb unavailable; KaaS endpoints will return 503", "err", err)
+	} else {
+		slog.Info("mongodb connected")
+	}
+
+	// KaaS: build provisioner + LB manager. Failures are non-fatal but mean the
+	// relevant endpoints return 503.
+	var kaasServer *kaas.Server
+	{
+		var prov provisioner.Provisioner
+		p, err := provisioner.NewDockerK3sProvisioner(kaas.DBStatusCallback())
+		if err != nil {
+			slog.Warn("docker provisioner unavailable; cluster endpoints will error", "err", err)
+		} else {
+			prov = p
+		}
+
+		var lbmgrInst *lbmgr.Manager
+		if lm, err := lbmgr.New(); err != nil {
+			slog.Warn("docker lb manager unavailable; lb endpoints will error", "err", err)
+		} else {
+			lbmgrInst = lm
+		}
+
+		kaasServer = kaas.NewServer(prov, lbmgrInst, slog.Default())
+		// Mount KaaS routes first so its more-specific POST/GET patterns win over
+		// the catch-all `/api/v1/` handler below.
+		kaasServer.Mount(mux)
+	}
+
 	mux.Handle("/api/v1/", middleware.Chain(handler, middleware.Logger, middleware.Recovery, middleware.CORS))
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -120,6 +157,10 @@ func main() {
 
 	sched.Stop()
 	server.Shutdown(shutdownCtx)
+	if err := kaasdb.Disconnect(shutdownCtx); err != nil {
+		slog.Warn("mongo disconnect", "err", err)
+	}
+	_ = kaasServer
 }
 
 func getStyles() string {

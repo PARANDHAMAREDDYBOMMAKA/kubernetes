@@ -29,7 +29,7 @@ export const useClustersStore = defineStore('clusters', {
       if (!silent) this.loadingList = true
       try {
         const { data } = await api.get<Cluster[]>('/api/v1/clusters')
-        this.list = data ?? []
+        this.list = Array.isArray(data) ? data : []
       } finally {
         if (!silent) this.loadingList = false
       }
@@ -39,7 +39,7 @@ export const useClustersStore = defineStore('clusters', {
       try {
         const { data } = await api.get<Cluster>(`/api/v1/clusters/${id}`)
         this.current = data
-        // update list entry
+        if (!Array.isArray(this.list)) this.list = []
         const idx = this.list.findIndex((c) => c.id === id)
         if (idx >= 0) this.list[idx] = data
         return data
@@ -49,12 +49,13 @@ export const useClustersStore = defineStore('clusters', {
     },
     async create(payload: CreateClusterPayload) {
       const { data } = await api.post<Cluster>('/api/v1/clusters', payload)
-      this.list = [data, ...this.list]
+      const current = Array.isArray(this.list) ? this.list : []
+      this.list = data ? [data, ...current] : current
       return data
     },
     async remove(id: string) {
       await api.delete(`/api/v1/clusters/${id}`)
-      // Keep in list but mark Deleting if backend still returns; otherwise remove
+      if (!Array.isArray(this.list)) this.list = []
       const idx = this.list.findIndex((c) => c.id === id)
       if (idx >= 0) {
         this.list[idx] = { ...this.list[idx], status: 'Deleting' }
@@ -68,6 +69,7 @@ export const useClustersStore = defineStore('clusters', {
         `/api/v1/clusters/${id}/scale`,
         { nodeCount }
       )
+      if (!Array.isArray(this.list)) this.list = []
       const idx = this.list.findIndex((c) => c.id === id)
       if (idx >= 0) this.list[idx] = data
       if (this.current?.id === id) this.current = data
