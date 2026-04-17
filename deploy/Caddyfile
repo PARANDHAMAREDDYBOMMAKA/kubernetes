@@ -1,0 +1,19 @@
+{$SITE_HOST} {
+    encode gzip
+
+    handle /api/* {
+        reverse_proxy apiserver:8080
+    }
+
+    handle /healthz {
+        reverse_proxy apiserver:8080
+    }
+
+    handle /dashboard/* {
+        reverse_proxy apiserver:8080
+    }
+
+    handle {
+        reverse_proxy web:80
+    }
+}

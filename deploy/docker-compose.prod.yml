@@ -1,0 +1,87 @@
+name: kaas
+
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks: [kaas]
+
+  etcd:
+    image: bitnami/etcd:latest
+    restart: unless-stopped
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+    volumes:
+      - etcd_data:/bitnami/etcd
+    networks: [kaas]
+
+  apiserver:
+    image: ${DOCKERHUB_USERNAME}/kube-apiserver:latest
+    restart: unless-stopped
+    depends_on: [mongodb, etcd]
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017
+      - MONGO_DB=kaas
+    command: ["-addr", ":8080", "-etcd", "etcd:2379"]
+    # Docker socket mount lets the KaaS provisioner create k3s-in-docker clusters.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [kaas]
+
+  controller:
+    image: ${DOCKERHUB_USERNAME}/kube-controller:latest
+    restart: unless-stopped
+    depends_on: [etcd]
+    command: ["-etcd", "etcd:2379"]
+    networks: [kaas]
+
+  scheduler:
+    image: ${DOCKERHUB_USERNAME}/kube-scheduler:latest
+    restart: unless-stopped
+    depends_on: [etcd]
+    command: ["-etcd", "etcd:2379"]
+    networks: [kaas]
+
+  agent:
+    image: ${DOCKERHUB_USERNAME}/kube-agent:latest
+    restart: unless-stopped
+    depends_on: [etcd]
+    command: ["-etcd", "etcd:2379", "-mock-runtime", "-node-name", "demo-node-1"]
+    networks: [kaas]
+
+  web:
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: "/"
+    restart: unless-stopped
+    networks: [kaas]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - SITE_HOST=${SITE_HOST}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web, apiserver]
+    networks: [kaas]
+
+networks:
+  kaas:
+
+volumes:
+  mongo_data:
+  etcd_data:
+  caddy_data:
+  caddy_config:
