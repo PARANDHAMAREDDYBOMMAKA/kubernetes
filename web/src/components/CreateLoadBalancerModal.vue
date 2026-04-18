@@ -30,10 +30,10 @@ interface FormState {
 const form = reactive<FormState>({
   name: '',
   clusterId: '',
-  port: 80,
-  targetPort: 8080,
+  port: 30080,
+  targetPort: 30080,
   algorithm: 'round_robin',
-  backends: [{ host: '', port: 8080 }]
+  backends: [{ host: '', port: 30080 }]
 })
 const errors = reactive<Record<string, string>>({})
 const submitting = ref(false)
@@ -71,10 +71,10 @@ watch(
     if (o) {
       form.name = ''
       form.clusterId = ''
-      form.port = 80
-      form.targetPort = 8080
+      form.port = 30080
+      form.targetPort = 30080
       form.algorithm = 'round_robin'
-      form.backends = [{ host: '', port: 8080 }]
+      form.backends = [{ host: '', port: 30080 }]
       Object.keys(errors).forEach((k) => delete errors[k])
       if (clusterStore.list.length === 0) {
         await clusterStore.fetchAll(true).catch(() => {})
@@ -98,8 +98,10 @@ async function submit() {
   Object.keys(errors).forEach((k) => delete errors[k])
   if (!form.name.trim()) errors.name = 'Required'
   if (!form.clusterId) errors.clusterId = 'Select a cluster'
-  if (!form.port || form.port < 1 || form.port > 65535)
-    errors.port = 'Invalid port'
+  if (!form.port || form.port < 30000 || form.port > 40000)
+    errors.port = 'Must be in 30000–40000 (reserved/firewall range)'
+  if (form.port === 80 || form.port === 443)
+    errors.port = 'Ports 80 and 443 are reserved by the platform'
   if (!form.targetPort || form.targetPort < 1 || form.targetPort > 65535)
     errors.targetPort = 'Invalid port'
 
