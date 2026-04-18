@@ -1,0 +1,10 @@
+[Unit]
+Description=KaaS auto-deploy poll timer
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+Unit=kaas-autodeploy.service
+
+[Install]
+WantedBy=timers.target

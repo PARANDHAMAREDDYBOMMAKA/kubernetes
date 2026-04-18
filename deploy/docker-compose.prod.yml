@@ -64,6 +64,35 @@ services:
         limits:
           memory: 128M
 
+  mongo-backup:
+    image: mongo:7
+    restart: unless-stopped
+    depends_on:
+      mongodb: {condition: service_healthy}
+    environment:
+      - MONGO_DB=${MONGO_DB:-kaas}
+      - BACKUP_KEEP_DAYS=${BACKUP_KEEP_DAYS:-7}
+      - BACKUP_CRON=${BACKUP_CRON:-0 3 * * *}
+    volumes:
+      - ./backup.sh:/usr/local/bin/backup.sh:ro
+      - mongo_backups:/backups
+    entrypoint: >
+      sh -c '
+        apt-get update -qq &&
+        apt-get install -y -qq cron >/dev/null &&
+        echo "$${BACKUP_CRON} root MONGO_DB=$${MONGO_DB} BACKUP_KEEP_DAYS=$${BACKUP_KEEP_DAYS} /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1" > /etc/cron.d/kaas-backup &&
+        chmod 0644 /etc/cron.d/kaas-backup &&
+        touch /var/log/backup.log &&
+        cron &&
+        tail -F /var/log/backup.log
+      '
+    networks: [kaas]
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -87,5 +116,6 @@ networks:
 
 volumes:
   mongo_data:
+  mongo_backups:
   caddy_data:
   caddy_config:

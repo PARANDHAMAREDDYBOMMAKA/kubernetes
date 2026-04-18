@@ -9,16 +9,20 @@ import (
 
 func (s *Server) Mount(mux *http.ServeMux) {
 	common := []middleware.Middleware{middleware.Logger, middleware.Recovery, middleware.CORS}
+	authRateLimit := middleware.PerIPRateLimit(10, 10)
 
 	public := func(h http.HandlerFunc) http.Handler {
 		return middleware.Chain(h, common...)
+	}
+	rateLimited := func(h http.HandlerFunc) http.Handler {
+		return middleware.Chain(h, append([]middleware.Middleware{authRateLimit}, common...)...)
 	}
 	authed := func(h http.HandlerFunc) http.Handler {
 		return middleware.Chain(auth.Required(h), common...)
 	}
 
-	mux.Handle("POST /api/v1/auth/register", public(s.Register))
-	mux.Handle("POST /api/v1/auth/login", public(s.Login))
+	mux.Handle("POST /api/v1/auth/register", rateLimited(s.Register))
+	mux.Handle("POST /api/v1/auth/login", rateLimited(s.Login))
 	mux.Handle("OPTIONS /api/v1/auth/register", public(okOptions))
 	mux.Handle("OPTIONS /api/v1/auth/login", public(okOptions))
 

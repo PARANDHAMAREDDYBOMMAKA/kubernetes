@@ -1,0 +1,11 @@
+[Unit]
+Description=KaaS auto-deploy (git pull + docker compose rebuild)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/kaas
+ExecStart=/opt/kaas/deploy/autodeploy.sh
+StandardOutput=journal
+StandardError=journal
