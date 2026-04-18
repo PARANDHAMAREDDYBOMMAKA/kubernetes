@@ -50,6 +50,17 @@ const clusterOptions = computed(() =>
     .map((c) => ({ value: c.id, label: `${c.name} (${c.region})` }))
 )
 
+const selectedCluster = computed(() =>
+  clusterStore.list.find((c) => c.id === form.clusterId)
+)
+
+const backendHint = computed(() => {
+  const c = selectedCluster.value
+  if (!c) return ''
+  const safe = c.id.replace(/[^A-Za-z0-9_-]/g, '-')
+  return `kaas-${safe}-agent-0`
+})
+
 onMounted(() => {
   if (clusterStore.list.length === 0) clusterStore.fetchAll(true).catch(() => {})
 })
@@ -199,6 +210,11 @@ async function submit() {
             Add backend
           </button>
         </div>
+        <p v-if="backendHint" class="mb-2 text-xs text-slate-500">
+          Tip: for k8s NodePort services, use
+          <code class="rounded bg-slate-800 px-1 py-0.5 text-slate-300">{{ backendHint }}</code>
+          as host and the NodePort (30000–32767) as port.
+        </p>
         <div class="space-y-2">
           <div
             v-for="(b, i) in form.backends"

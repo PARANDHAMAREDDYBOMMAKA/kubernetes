@@ -11,6 +11,7 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 
@@ -87,6 +88,23 @@ func containerName(lb *models.LoadBalancer) string {
 	return "kaas-lb-" + lb.ID
 }
 
+func sanitize(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '-', r == '_':
+			b.WriteRune(r)
+		default:
+			b.WriteRune('-')
+		}
+	}
+	return b.String()
+}
+
+func clusterNetworkName(clusterID string) string {
+	return "kaas-" + sanitize(clusterID)
+}
+
 func (m *Manager) Create(ctx context.Context, lb *models.LoadBalancer) error {
 	lb.Status = models.LBStatusProvisioning
 	lb.UpdatedAt = time.Now().UTC()
@@ -114,7 +132,18 @@ func (m *Manager) Create(ctx context.Context, lb *models.LoadBalancer) error {
 		RestartPolicy: container.RestartPolicy{Name: "unless-stopped"},
 	}
 
-	resp, err := m.cli.ContainerCreate(ctx, cfg, hostCfg, nil, nil, containerName(lb))
+	var netCfg *network.NetworkingConfig
+	if lb.ClusterID != "" {
+		netName := clusterNetworkName(lb.ClusterID)
+		hostCfg.NetworkMode = container.NetworkMode(netName)
+		netCfg = &network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				netName: {Aliases: []string{containerName(lb)}},
+			},
+		}
+	}
+
+	resp, err := m.cli.ContainerCreate(ctx, cfg, hostCfg, netCfg, nil, containerName(lb))
 	if err != nil {
 		lb.Status = models.LBStatusFailed
 		return fmt.Errorf("container create: %w", err)
