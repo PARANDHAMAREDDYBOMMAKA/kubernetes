@@ -1,4 +1,3 @@
-// Package lbmgr runs nginx-based L4/L7 load balancers as Docker containers.
 package lbmgr
 
 import (
@@ -22,12 +21,10 @@ const (
 	defaultImage = "nginx:alpine"
 )
 
-// Manager provisions nginx load balancers.
 type Manager struct {
 	cli *client.Client
 }
 
-// New creates a Manager using Docker from environment.
 func New() (*Manager, error) {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -36,7 +33,6 @@ func New() (*Manager, error) {
 	return &Manager{cli: cli}, nil
 }
 
-// Close releases the Docker client.
 func (m *Manager) Close() error {
 	if m.cli == nil {
 		return nil
@@ -44,7 +40,6 @@ func (m *Manager) Close() error {
 	return m.cli.Close()
 }
 
-// BuildNginxConfig renders an nginx.conf for the given load balancer.
 func BuildNginxConfig(lb *models.LoadBalancer) string {
 	algo := ""
 	switch lb.Algorithm {
@@ -53,7 +48,6 @@ func BuildNginxConfig(lb *models.LoadBalancer) string {
 	case models.AlgoIPHash:
 		algo = "    ip_hash;\n"
 	case models.AlgoRoundRobin, "":
-		// Default is round robin.
 	}
 	var servers strings.Builder
 	for _, b := range lb.Backends {
@@ -68,7 +62,6 @@ func BuildNginxConfig(lb *models.LoadBalancer) string {
 		fmt.Fprintf(&servers, "    server %s:%d max_fails=3 fail_timeout=10s;\n", host, port)
 	}
 	if servers.Len() == 0 {
-		// Dummy backend so nginx starts even with no backends.
 		servers.WriteString("    server 127.0.0.1:65535 down;\n")
 	}
 	return fmt.Sprintf(`worker_processes  1;
@@ -90,12 +83,10 @@ http {
 `, algo, servers.String(), lb.Port)
 }
 
-// containerName returns the Docker container name.
 func containerName(lb *models.LoadBalancer) string {
 	return "kaas-lb-" + lb.ID
 }
 
-// Create provisions the nginx container.
 func (m *Manager) Create(ctx context.Context, lb *models.LoadBalancer) error {
 	lb.Status = models.LBStatusProvisioning
 	lb.UpdatedAt = time.Now().UTC()
@@ -130,7 +121,6 @@ func (m *Manager) Create(ctx context.Context, lb *models.LoadBalancer) error {
 	}
 	lb.ContainerID = resp.ID
 
-	// Write nginx.conf into the container before starting.
 	if err := m.copyConfig(ctx, resp.ID, BuildNginxConfig(lb)); err != nil {
 		_ = m.cli.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
 		lb.Status = models.LBStatusFailed
@@ -148,7 +138,6 @@ func (m *Manager) Create(ctx context.Context, lb *models.LoadBalancer) error {
 	return nil
 }
 
-// Delete stops and removes the nginx container.
 func (m *Manager) Delete(ctx context.Context, lb *models.LoadBalancer) error {
 	lb.Status = models.LBStatusDeleting
 	if lb.ContainerID != "" {
@@ -175,7 +164,6 @@ func (m *Manager) ensureImage(ctx context.Context) error {
 	return nil
 }
 
-// copyConfig puts an nginx.conf into the container at /etc/nginx/nginx.conf.
 func (m *Manager) copyConfig(ctx context.Context, containerID, conf string) error {
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)

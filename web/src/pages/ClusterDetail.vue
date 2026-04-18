@@ -13,6 +13,7 @@ import {
 } from 'lucide-vue-next'
 import { useClustersStore } from '@/stores/clusters'
 import { useToastStore } from '@/stores/toast'
+import type { ClusterNode } from '@/types'
 import { extractErrorMessage } from '@/lib/api'
 import Button from '@/components/ui/Button.vue'
 import Card from '@/components/ui/Card.vue'
@@ -40,8 +41,24 @@ const confirmDelete = ref(false)
 const deleting = ref(false)
 
 const pollTimer = ref<number | null>(null)
+const nodes = ref<ClusterNode[]>([])
+const nodesLoading = ref(false)
+const nodesError = ref<string>('')
 
 const cluster = computed(() => clusters.current)
+
+async function loadNodes(silent = false) {
+  if (!cluster.value) return
+  if (!silent) nodesLoading.value = true
+  try {
+    nodes.value = await clusters.fetchNodes(cluster.value.id)
+    nodesError.value = ''
+  } catch (err: any) {
+    nodesError.value = err?.message || 'Failed to load nodes'
+  } finally {
+    nodesLoading.value = false
+  }
+}
 
 async function fetch(silent = false) {
   try {
@@ -57,6 +74,7 @@ function schedulePolling() {
   pollTimer.value = window.setInterval(() => {
     const s = cluster.value?.status
     if (s === 'Provisioning' || s === 'Deleting') fetch(true)
+    if (activeTab.value === 'nodes' && cluster.value) loadNodes(true)
   }, 3000)
 }
 
@@ -135,7 +153,22 @@ async function fetchYamlOnly() {
 watch(activeTab, (t) => {
   if (t === 'kubeconfig') fetchKubeconfigOnly()
   if (t === 'yaml') fetchYamlOnly()
+  if (t === 'nodes') loadNodes()
 })
+
+function nodeBadgeVariant(n: ClusterNode): string {
+  if (n.ready) return 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30'
+  if (n.state === 'running' || n.state === 'created') return 'bg-amber-500/10 text-amber-200 ring-amber-500/30'
+  return 'bg-rose-500/10 text-rose-300 ring-rose-500/30'
+}
+
+function nodeStatusLabel(n: ClusterNode): string {
+  if (n.ready) return 'Ready'
+  if (n.state === 'exited') return `Exited (${n.exitCode ?? 0})`
+  if (n.state === 'restarting') return 'Restarting'
+  if (n.state === 'missing') return 'Missing'
+  return n.state || 'Unknown'
+}
 
 async function applyScale() {
   if (!cluster.value) return
@@ -478,19 +511,74 @@ const tabs = [
       </Card>
     </div>
 
-    <!-- Nodes tab (placeholder) -->
     <div v-if="cluster && activeTab === 'nodes'">
-      <Card title="Nodes" description="Worker nodes powering this cluster.">
-        <div class="rounded-lg border border-dashed border-slate-800 p-10 text-center">
+      <Card title="Nodes" description="Control-plane and worker nodes for this cluster.">
+        <template #actions>
+          <Button
+            variant="outline"
+            size="sm"
+            :loading="nodesLoading"
+            @click="loadNodes()"
+          >
+            <RefreshCw class="h-4 w-4" />
+            Refresh
+          </Button>
+        </template>
+
+        <div v-if="nodesLoading && nodes.length === 0" class="space-y-2">
+          <div class="skeleton h-10 w-full" />
+          <div class="skeleton h-10 w-full" />
+        </div>
+
+        <div
+          v-else-if="nodesError"
+          class="rounded border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-200"
+        >
+          {{ nodesError }}
+        </div>
+
+        <div v-else-if="nodes.length === 0" class="rounded-lg border border-dashed border-slate-800 p-8 text-center">
           <Server class="mx-auto h-8 w-8 text-slate-600" />
-          <p class="mt-3 text-sm text-slate-300">
-            Per-node metrics will be available soon.
-          </p>
-          <p class="mt-1 text-xs text-slate-500">
-            This cluster currently runs {{ cluster.nodeCount }} node{{
-              cluster.nodeCount === 1 ? '' : 's'
-            }}.
-          </p>
+          <p class="mt-3 text-sm text-slate-300">No nodes yet.</p>
+        </div>
+
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th class="py-2 pr-4">Name</th>
+                <th class="py-2 pr-4">Role</th>
+                <th class="py-2 pr-4">Status</th>
+                <th class="py-2 pr-4">Container</th>
+                <th class="py-2 pr-4">Started</th>
+                <th class="py-2 pr-4">Message</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+              <tr v-for="n in nodes" :key="n.name" class="align-top">
+                <td class="py-3 pr-4 font-mono text-xs text-slate-200">{{ n.name }}</td>
+                <td class="py-3 pr-4 text-slate-300">{{ n.role }}</td>
+                <td class="py-3 pr-4">
+                  <span
+                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
+                    :class="nodeBadgeVariant(n)"
+                  >
+                    {{ nodeStatusLabel(n) }}
+                  </span>
+                </td>
+                <td class="py-3 pr-4 font-mono text-xs text-slate-500">
+                  {{ n.containerId ? n.containerId.slice(0, 12) : '—' }}
+                </td>
+                <td class="py-3 pr-4 text-xs text-slate-400">
+                  {{ n.startedAt && !n.startedAt.startsWith('0001') ? formatDate(n.startedAt) : '—' }}
+                </td>
+                <td class="py-3 pr-4 text-xs text-slate-400">
+                  <pre v-if="n.message" class="max-w-md whitespace-pre-wrap break-words text-[11px] text-slate-400">{{ n.message }}</pre>
+                  <span v-else>—</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </Card>
     </div>

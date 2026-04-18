@@ -1,12 +1,21 @@
 FROM golang:1.24-alpine AS builder
 ENV GOTOOLCHAIN=auto
+ARG BUILD_VERSION=dev
+ARG BUILD_COMMIT=unknown
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -trimpath -o /kube-apiserver ./cmd/apiserver
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-s -w -X main.version=${BUILD_VERSION} -X main.commit=${BUILD_COMMIT}" \
+    -trimpath -o /kube-apiserver ./cmd/apiserver
 
 FROM gcr.io/distroless/static:nonroot
+LABEL org.opencontainers.image.source="https://github.com/PARANDHAMAREDDYBOMMAKA/kubernetes"
+LABEL org.opencontainers.image.title="kube-apiserver"
+ARG BUILD_VERSION=dev
+ARG BUILD_COMMIT=unknown
+ENV APP_VERSION=${BUILD_VERSION} APP_COMMIT=${BUILD_COMMIT}
 COPY --from=builder /kube-apiserver /kube-apiserver
 USER nonroot:nonroot
 EXPOSE 8080

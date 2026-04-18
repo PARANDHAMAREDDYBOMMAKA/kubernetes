@@ -1,4 +1,3 @@
-// Package db wraps the MongoDB client used for KaaS persistence.
 package db
 
 import (
@@ -24,8 +23,6 @@ var (
 	database *mongo.Database
 )
 
-// Connect establishes a Mongo connection using MONGO_URI and MONGO_DB env vars.
-// If already connected, returns the existing client.
 func Connect(ctx context.Context) (*mongo.Client, error) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -67,7 +64,6 @@ func Connect(ctx context.Context) (*mongo.Client, error) {
 	return client, nil
 }
 
-// Disconnect closes the underlying Mongo client, if any.
 func Disconnect(ctx context.Context) error {
 	mu.Lock()
 	defer mu.Unlock()
@@ -80,21 +76,18 @@ func Disconnect(ctx context.Context) error {
 	return err
 }
 
-// DB returns the active *mongo.Database. Nil if not connected.
 func DB() *mongo.Database {
 	mu.RLock()
 	defer mu.RUnlock()
 	return database
 }
 
-// IsConnected returns true once Connect has succeeded.
 func IsConnected() bool {
 	mu.RLock()
 	defer mu.RUnlock()
 	return database != nil
 }
 
-// Users returns the users collection.
 func Users() *mongo.Collection {
 	mu.RLock()
 	defer mu.RUnlock()
@@ -104,7 +97,6 @@ func Users() *mongo.Collection {
 	return database.Collection(CollectionUsers)
 }
 
-// Clusters returns the clusters collection.
 func Clusters() *mongo.Collection {
 	mu.RLock()
 	defer mu.RUnlock()
@@ -114,7 +106,6 @@ func Clusters() *mongo.Collection {
 	return database.Collection(CollectionClusters)
 }
 
-// LoadBalancers returns the loadbalancers collection.
 func LoadBalancers() *mongo.Collection {
 	mu.RLock()
 	defer mu.RUnlock()

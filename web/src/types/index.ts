@@ -26,6 +26,21 @@ export interface Cluster {
   updatedAt: string
 }
 
+export type NodeRole = 'server' | 'agent'
+
+export interface ClusterNode {
+  name: string
+  role: NodeRole
+  containerId: string
+  state: string
+  status: string
+  exitCode?: number
+  ready: boolean
+  startedAt: string
+  finishedAt: string
+  message?: string
+}
+
 export interface Backend {
   host: string
   port: number

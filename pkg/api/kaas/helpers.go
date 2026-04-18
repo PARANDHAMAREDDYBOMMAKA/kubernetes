@@ -1,4 +1,3 @@
-// Package kaas exposes the KaaS HTTP API under /api/v1.
 package kaas
 
 import (
@@ -19,14 +18,12 @@ import (
 	"github.com/parandhamareddybommaka/kube/pkg/provisioner"
 )
 
-// Server bundles the dependencies the KaaS handlers need.
 type Server struct {
 	Prov   provisioner.Provisioner
 	LB     *lbmgr.Manager
 	Logger *slog.Logger
 }
 
-// NewServer constructs a Server with the given deps. Logger defaults to slog.Default.
 func NewServer(p provisioner.Provisioner, lb *lbmgr.Manager, logger *slog.Logger) *Server {
 	if logger == nil {
 		logger = slog.Default()
@@ -34,7 +31,6 @@ func NewServer(p provisioner.Provisioner, lb *lbmgr.Manager, logger *slog.Logger
 	return &Server{Prov: p, LB: lb, Logger: logger}
 }
 
-// writeJSON writes a JSON response with the given status.
 func writeJSON(w http.ResponseWriter, status int, body any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -44,12 +40,10 @@ func writeJSON(w http.ResponseWriter, status int, body any) {
 	_ = json.NewEncoder(w).Encode(body)
 }
 
-// writeErr writes a JSON error envelope.
 func writeErr(w http.ResponseWriter, status int, msg string) {
 	writeJSON(w, status, map[string]string{"error": msg})
 }
 
-// readJSON decodes a request body into v. Returns true on success.
 func readJSON(w http.ResponseWriter, r *http.Request, v any) bool {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
@@ -60,7 +54,6 @@ func readJSON(w http.ResponseWriter, r *http.Request, v any) bool {
 	return true
 }
 
-// requireDB returns false and writes 503 if Mongo isn't connected.
 func requireDB(w http.ResponseWriter) bool {
 	if !db.IsConnected() {
 		writeErr(w, http.StatusServiceUnavailable, "database unavailable")
@@ -69,7 +62,6 @@ func requireDB(w http.ResponseWriter) bool {
 	return true
 }
 
-// currentUser returns the authenticated user's full record or 401.
 func currentUser(ctx context.Context) (*models.User, error) {
 	userID := auth.UserIDFromCtx(ctx)
 	if userID == "" {
@@ -85,5 +77,4 @@ func currentUser(ctx context.Context) (*models.User, error) {
 	return &user, nil
 }
 
-// nowUTC returns the current time in UTC.
 func nowUTC() time.Time { return time.Now().UTC() }

@@ -1,4 +1,3 @@
-// Package auth provides JWT generation, password hashing, and HTTP middleware.
 package auth
 
 import (
@@ -31,11 +30,8 @@ var (
 	secret     []byte
 )
 
-// ErrUnauthorized is returned by ParseToken when the token is invalid/expired.
 var ErrUnauthorized = errors.New("unauthorized")
 
-// Secret returns the JWT signing secret, generating a random one on first call
-// if JWT_SECRET is unset. A warning is logged in that case.
 func Secret() []byte {
 	secretOnce.Do(func() {
 		if s := os.Getenv("JWT_SECRET"); s != "" {
@@ -44,7 +40,6 @@ func Secret() []byte {
 		}
 		b := make([]byte, 32)
 		if _, err := rand.Read(b); err != nil {
-			// Extremely unlikely; fall back to a timestamp-based secret.
 			s := fmt.Sprintf("kaas-fallback-%d", time.Now().UnixNano())
 			b = []byte(s)
 		}
@@ -54,7 +49,6 @@ func Secret() []byte {
 	return secret
 }
 
-// HashPassword bcrypt-hashes a plaintext password.
 func HashPassword(password string) (string, error) {
 	if password == "" {
 		return "", errors.New("password must not be empty")
@@ -66,18 +60,15 @@ func HashPassword(password string) (string, error) {
 	return string(h), nil
 }
 
-// CheckPassword returns nil if the password matches the bcrypt hash.
 func CheckPassword(hash, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 }
 
-// Claims is the JWT payload.
 type Claims struct {
 	UserID string `json:"sub"`
 	jwt.RegisteredClaims
 }
 
-// GenerateToken signs a JWT for the given user ID.
 func GenerateToken(userID string) (string, error) {
 	if userID == "" {
 		return "", errors.New("userID required")
@@ -96,7 +87,6 @@ func GenerateToken(userID string) (string, error) {
 	return tok.SignedString(Secret())
 }
 
-// ParseToken validates the given bearer token and returns the user ID.
 func ParseToken(s string) (string, error) {
 	if s == "" {
 		return "", ErrUnauthorized
@@ -117,18 +107,15 @@ func ParseToken(s string) (string, error) {
 	return claims.UserID, nil
 }
 
-// UserIDFromCtx retrieves the authenticated userID from the request context.
 func UserIDFromCtx(ctx context.Context) string {
 	v, _ := ctx.Value(userIDKey).(string)
 	return v
 }
 
-// WithUserID puts a userID into the context. Exposed primarily for testing.
 func WithUserID(ctx context.Context, userID string) context.Context {
 	return context.WithValue(ctx, userIDKey, userID)
 }
 
-// Required is an HTTP middleware that enforces a valid bearer token.
 func Required(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h := r.Header.Get("Authorization")

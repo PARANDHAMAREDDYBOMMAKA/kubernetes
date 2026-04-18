@@ -10,8 +10,6 @@ import (
 	"github.com/parandhamareddybommaka/kube/pkg/provisioner"
 )
 
-// DBStatusCallback returns a provisioner.StatusCallback that persists cluster
-// status updates to MongoDB. Safe to pass nil db (no-op).
 func DBStatusCallback() provisioner.StatusCallback {
 	return func(ctx context.Context, c *models.Cluster, _ provisioner.StatusUpdate) error {
 		if !db.IsConnected() {

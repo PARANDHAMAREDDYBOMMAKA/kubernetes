@@ -38,7 +38,6 @@ func genID() string {
 	return hex.EncodeToString(b)
 }
 
-// Register creates a new user account and returns a signed token.
 func (s *Server) Register(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -54,7 +53,6 @@ func (s *Server) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	// Reject duplicates.
 	var existing models.User
 	err := db.Users().FindOne(ctx, bson.M{"email": req.Email}).Decode(&existing)
 	if err == nil {

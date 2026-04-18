@@ -24,7 +24,6 @@ type createLBRequest struct {
 	Backends   []models.Backend `json:"backends"`
 }
 
-// ListLBs returns all load balancers owned by the caller.
 func (s *Server) ListLBs(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -44,7 +43,6 @@ func (s *Server) ListLBs(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, lbs)
 }
 
-// CreateLB provisions a new nginx load balancer.
 func (s *Server) CreateLB(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -77,7 +75,6 @@ func (s *Server) CreateLB(w http.ResponseWriter, r *http.Request) {
 
 	userID := auth.UserIDFromCtx(r.Context())
 
-	// If a clusterId is given, verify the cluster belongs to the user.
 	if req.ClusterID != "" {
 		if _, err := s.loadOwnedCluster(r.Context(), req.ClusterID); err != nil {
 			writeNotFound(w, err)
@@ -110,7 +107,6 @@ func (s *Server) CreateLB(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusAccepted, lb)
 }
 
-// GetLB returns a single load balancer.
 func (s *Server) GetLB(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -123,7 +119,6 @@ func (s *Server) GetLB(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, lb)
 }
 
-// DeleteLB removes a load balancer.
 func (s *Server) DeleteLB(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -142,7 +137,6 @@ func (s *Server) DeleteLB(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// LBYAML returns the load balancer as a Kubernetes Service+Endpoints YAML.
 func (s *Server) LBYAML(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return

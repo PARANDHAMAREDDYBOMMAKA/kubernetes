@@ -1,4 +1,3 @@
-// Package yamlexport renders KaaS resources as Kubernetes-style YAML manifests.
 package yamlexport
 
 import (
@@ -10,7 +9,6 @@ import (
 	"github.com/parandhamareddybommaka/kube/pkg/models"
 )
 
-// ClusterToYAML renders a custom kaas.local/v1 Cluster manifest.
 func ClusterToYAML(c *models.Cluster) (string, error) {
 	doc := map[string]any{
 		"apiVersion": "kaas.local/v1",
@@ -34,10 +32,7 @@ func ClusterToYAML(c *models.Cluster) (string, error) {
 	return marshal(doc)
 }
 
-// LoadBalancerToYAML renders a Kubernetes Service (type=LoadBalancer) and
-// Endpoints manifest pair, joined by `---`.
 func LoadBalancerToYAML(lb *models.LoadBalancer) (string, error) {
-	// Service manifest.
 	svc := map[string]any{
 		"apiVersion": "v1",
 		"kind":       "Service",
@@ -65,7 +60,6 @@ func LoadBalancerToYAML(lb *models.LoadBalancer) (string, error) {
 		},
 	}
 
-	// Endpoints manifest.
 	addrs := make([]map[string]any, 0, len(lb.Backends))
 	for _, b := range lb.Backends {
 		addrs = append(addrs, map[string]any{"ip": b.Host})
@@ -101,12 +95,10 @@ func LoadBalancerToYAML(lb *models.LoadBalancer) (string, error) {
 	return svcYAML + "---\n" + epYAML, nil
 }
 
-// Kubeconfig returns the raw kubeconfig stored on the cluster.
 func Kubeconfig(c *models.Cluster) string {
 	return c.Kubeconfig
 }
 
-// marshal renders v as a YAML document.
 func marshal(v any) (string, error) {
 	var buf bytes.Buffer
 	enc := yaml.NewEncoder(&buf)

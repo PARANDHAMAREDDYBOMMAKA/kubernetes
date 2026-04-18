@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,6 +13,7 @@ import (
 	"github.com/parandhamareddybommaka/kube/pkg/auth"
 	"github.com/parandhamareddybommaka/kube/pkg/db"
 	"github.com/parandhamareddybommaka/kube/pkg/models"
+	"github.com/parandhamareddybommaka/kube/pkg/provisioner"
 	"github.com/parandhamareddybommaka/kube/pkg/yamlexport"
 )
 
@@ -26,7 +28,6 @@ type scaleClusterRequest struct {
 	NodeCount int `json:"nodeCount"`
 }
 
-// ListClusters returns all clusters owned by the current user.
 func (s *Server) ListClusters(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -43,7 +44,6 @@ func (s *Server) ListClusters(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	// Strip sensitive fields.
 	for _, c := range clusters {
 		c.Kubeconfig = ""
 		c.ClusterToken = ""
@@ -51,7 +51,6 @@ func (s *Server) ListClusters(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, clusters)
 }
 
-// CreateCluster records a new cluster and kicks off async provisioning.
 func (s *Server) CreateCluster(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -96,13 +95,11 @@ func (s *Server) CreateCluster(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Kick off async provisioning.
 	go s.asyncProvision(cluster.ID)
 
 	writeJSON(w, http.StatusAccepted, cluster)
 }
 
-// GetCluster returns a single cluster owned by the caller.
 func (s *Server) GetCluster(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -117,7 +114,6 @@ func (s *Server) GetCluster(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, cluster)
 }
 
-// DeleteCluster removes a cluster and tears down its containers.
 func (s *Server) DeleteCluster(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -127,7 +123,6 @@ func (s *Server) DeleteCluster(w http.ResponseWriter, r *http.Request) {
 		writeNotFound(w, err)
 		return
 	}
-	// Mark deleting, then async tear down.
 	cluster.Status = models.ClusterStatusDeleting
 	cluster.UpdatedAt = nowUTC()
 	_ = s.persistCluster(r.Context(), cluster)
@@ -137,7 +132,6 @@ func (s *Server) DeleteCluster(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// ScaleCluster adjusts the agent count.
 func (s *Server) ScaleCluster(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -170,7 +164,6 @@ func (s *Server) ScaleCluster(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusAccepted, cluster)
 }
 
-// Kubeconfig returns the cluster's kubeconfig as a YAML download.
 func (s *Server) Kubeconfig(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -189,7 +182,32 @@ func (s *Server) Kubeconfig(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(cluster.Kubeconfig))
 }
 
-// ClusterYAML returns the cluster spec as a custom YAML manifest.
+func (s *Server) ListNodes(w http.ResponseWriter, r *http.Request) {
+	if !requireDB(w) {
+		return
+	}
+	cluster, err := s.loadOwnedCluster(r.Context(), r.PathValue("id"))
+	if err != nil {
+		writeNotFound(w, err)
+		return
+	}
+	if s.Prov == nil {
+		writeJSON(w, http.StatusOK, []provisioner.NodeInfo{})
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+	nodes, err := s.Prov.Nodes(ctx, cluster)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "list nodes: "+err.Error())
+		return
+	}
+	if nodes == nil {
+		nodes = []provisioner.NodeInfo{}
+	}
+	writeJSON(w, http.StatusOK, nodes)
+}
+
 func (s *Server) ClusterYAML(w http.ResponseWriter, r *http.Request) {
 	if !requireDB(w) {
 		return
@@ -209,9 +227,6 @@ func (s *Server) ClusterYAML(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(yamlStr))
 }
 
-// loadOwnedCluster finds a cluster by ID and verifies it belongs to the caller.
-// Returns a mongo.ErrNoDocuments-equivalent error if missing or not owned, so
-// callers can respond with 404 regardless of the real reason.
 func (s *Server) loadOwnedCluster(ctx context.Context, id string) (*models.Cluster, error) {
 	if id == "" {
 		return nil, mongo.ErrNoDocuments
@@ -228,7 +243,6 @@ func (s *Server) loadOwnedCluster(ctx context.Context, id string) (*models.Clust
 	return &c, nil
 }
 
-// persistCluster upserts a cluster document by ID.
 func (s *Server) persistCluster(ctx context.Context, c *models.Cluster) error {
 	c.UpdatedAt = nowUTC()
 	_, err := db.Clusters().UpdateOne(ctx, bson.M{"_id": c.ID}, bson.M{"$set": c})

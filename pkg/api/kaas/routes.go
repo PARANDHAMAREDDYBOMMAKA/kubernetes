@@ -7,9 +7,6 @@ import (
 	"github.com/parandhamareddybommaka/kube/pkg/auth"
 )
 
-// Mount installs the KaaS routes on the given mux.
-// It wraps all handlers with Logger, Recovery, and CORS middleware, and
-// additionally wraps the authenticated routes with auth.Required.
 func (s *Server) Mount(mux *http.ServeMux) {
 	common := []middleware.Middleware{middleware.Logger, middleware.Recovery, middleware.CORS}
 
@@ -20,16 +17,13 @@ func (s *Server) Mount(mux *http.ServeMux) {
 		return middleware.Chain(auth.Required(h), common...)
 	}
 
-	// Public auth endpoints.
 	mux.Handle("POST /api/v1/auth/register", public(s.Register))
 	mux.Handle("POST /api/v1/auth/login", public(s.Login))
 	mux.Handle("OPTIONS /api/v1/auth/register", public(okOptions))
 	mux.Handle("OPTIONS /api/v1/auth/login", public(okOptions))
 
-	// Authed auth endpoint.
 	mux.Handle("GET /api/v1/auth/me", authed(s.Me))
 
-	// Clusters.
 	mux.Handle("GET /api/v1/clusters", authed(s.ListClusters))
 	mux.Handle("POST /api/v1/clusters", authed(s.CreateCluster))
 	mux.Handle("GET /api/v1/clusters/{id}", authed(s.GetCluster))
@@ -37,8 +31,8 @@ func (s *Server) Mount(mux *http.ServeMux) {
 	mux.Handle("POST /api/v1/clusters/{id}/scale", authed(s.ScaleCluster))
 	mux.Handle("GET /api/v1/clusters/{id}/kubeconfig", authed(s.Kubeconfig))
 	mux.Handle("GET /api/v1/clusters/{id}/yaml", authed(s.ClusterYAML))
+	mux.Handle("GET /api/v1/clusters/{id}/nodes", authed(s.ListNodes))
 
-	// Load balancers.
 	mux.Handle("GET /api/v1/loadbalancers", authed(s.ListLBs))
 	mux.Handle("POST /api/v1/loadbalancers", authed(s.CreateLB))
 	mux.Handle("GET /api/v1/loadbalancers/{id}", authed(s.GetLB))

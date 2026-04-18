@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { api } from '@/lib/api'
 import { downloadTextFile } from '@/lib/utils'
-import type { Cluster, CreateClusterPayload } from '@/types'
+import type { Cluster, ClusterNode, CreateClusterPayload } from '@/types'
 
 interface ClustersState {
   list: Cluster[]
@@ -98,6 +98,10 @@ export const useClustersStore = defineStore('clusters', {
       const text = await this.fetchYaml(cluster.id)
       downloadTextFile(text, `${cluster.name}.yaml`)
       return text
+    },
+    async fetchNodes(id: string): Promise<ClusterNode[]> {
+      const { data } = await api.get<ClusterNode[]>(`/api/v1/clusters/${id}/nodes`)
+      return Array.isArray(data) ? data : []
     }
   }
 })

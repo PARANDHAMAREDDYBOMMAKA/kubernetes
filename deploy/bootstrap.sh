@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run on a fresh Ubuntu 22.04 / 24.04 DigitalOcean droplet as root.
-# Usage:
-#   curl -fsSL https://raw.githubusercontent.com/PARANDHAMAREDDYBOMMAKA/kubernetes/main/deploy/bootstrap.sh | bash
 
 REPO_URL="https://github.com/PARANDHAMAREDDYBOMMAKA/kubernetes.git"
 APP_DIR="/opt/kaas"
@@ -32,14 +29,21 @@ if [ ! -f .env ]; then
   if [ -n "$IP" ]; then
     sed -i "s/REPLACE_WITH_DROPLET_IP/${IP}/" .env
   fi
+  SECRET=$(head -c 48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 48)
+  sed -i "s/REPLACE_WITH_LONG_RANDOM_STRING/${SECRET}/" .env
+  DGID=$(getent group docker | awk -F: '{print $3}')
+  if [ -n "${DGID:-}" ]; then
+    sed -i "s/^DOCKER_GID=.*/DOCKER_GID=${DGID}/" .env
+  fi
+  GIT_COMMIT=$(git -C "${APP_DIR}" rev-parse --short HEAD)
+  echo "GIT_COMMIT=${GIT_COMMIT}" >> .env
   echo
-  echo "==> Created deploy/.env — edit DOCKERHUB_USERNAME, then run:"
-  echo "    cd ${APP_DIR}/deploy && docker compose -f docker-compose.prod.yml up -d"
+  echo "==> Wrote deploy/.env. Edit SITE_HOST if you want a custom domain, then run:"
+  echo "    cd ${APP_DIR}/deploy && docker compose -f docker-compose.prod.yml up -d --build"
   exit 0
 fi
 
-echo "==> Pulling + starting stack"
-docker compose -f docker-compose.prod.yml pull
+echo "==> Building + starting stack"
 docker compose -f docker-compose.prod.yml up -d --build
 
 echo

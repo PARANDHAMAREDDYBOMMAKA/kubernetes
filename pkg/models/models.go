@@ -2,7 +2,6 @@ package models
 
 import "time"
 
-// Cluster status constants.
 const (
 	ClusterStatusProvisioning = "Provisioning"
 	ClusterStatusRunning      = "Running"
@@ -11,7 +10,6 @@ const (
 	ClusterStatusDeleted      = "Deleted"
 )
 
-// LoadBalancer status constants.
 const (
 	LBStatusProvisioning = "Provisioning"
 	LBStatusRunning      = "Running"
@@ -20,14 +18,12 @@ const (
 	LBStatusDeleted      = "Deleted"
 )
 
-// Load balancer algorithms.
 const (
 	AlgoRoundRobin = "round_robin"
 	AlgoLeastConn  = "least_conn"
 	AlgoIPHash     = "ip_hash"
 )
 
-// User represents an authenticated user of the KaaS platform.
 type User struct {
 	ID           string    `bson:"_id,omitempty" json:"id"`
 	Email        string    `bson:"email" json:"email"`
@@ -36,7 +32,6 @@ type User struct {
 	CreatedAt    time.Time `bson:"created_at" json:"createdAt"`
 }
 
-// Cluster is a provisioned k3s-in-Docker cluster.
 type Cluster struct {
 	ID                string    `bson:"_id,omitempty" json:"id"`
 	UserID            string    `bson:"user_id" json:"userId"`
@@ -55,13 +50,11 @@ type Cluster struct {
 	Message           string    `bson:"message" json:"message"`
 }
 
-// Backend is a downstream endpoint behind a LoadBalancer.
 type Backend struct {
 	Host string `bson:"host" json:"host"`
 	Port int    `bson:"port" json:"port"`
 }
 
-// LoadBalancer is an nginx-based L4/L7 load balancer.
 type LoadBalancer struct {
 	ID          string    `bson:"_id,omitempty" json:"id"`
 	UserID      string    `bson:"user_id" json:"userId"`
