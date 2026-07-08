@@ -5,15 +5,19 @@ import Button from '@/components/ui/Button.vue'
 
 <template>
   <div
-    class="flex min-h-screen flex-col items-center justify-center bg-slate-950 px-4 text-center"
+    class="term-grid flex min-h-screen flex-col items-center justify-center bg-ink-950 px-4 text-center"
   >
-    <p class="font-mono text-sm text-brand-300">404</p>
-    <h1 class="mt-2 text-3xl font-semibold text-white">Page not found</h1>
-    <p class="mt-2 max-w-sm text-sm text-slate-400">
-      The page you're looking for doesn't exist or has been moved.
+    <p class="text-sm text-red-400">
+      <span class="text-slate-600">$</span> cat /page → exit 404
+    </p>
+    <h1 class="mt-3 text-2xl font-semibold text-slate-100">
+      page not found<span class="animate-blink text-brand-400">▊</span>
+    </h1>
+    <p class="mt-2 max-w-sm text-sm text-slate-500">
+      the route you requested doesn't exist or has been moved.
     </p>
     <RouterLink to="/clusters" class="mt-6">
-      <Button variant="primary">Back to dashboard</Button>
+      <Button variant="primary">← back to dashboard</Button>
     </RouterLink>
   </div>
 </template>

@@ -92,9 +92,11 @@ async function doDelete() {
   <div class="space-y-6">
     <header class="flex flex-wrap items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-semibold text-white">Clusters</h1>
-        <p class="mt-1 text-sm text-slate-400">
-          Managed Kubernetes clusters in your account.
+        <h1 class="text-xl font-semibold text-slate-100">
+          <span class="text-brand-400">#</span> clusters
+        </h1>
+        <p class="mt-1 text-sm text-slate-500">
+          managed k3s clusters in your account
         </p>
       </div>
       <div class="flex items-center gap-2">
@@ -140,10 +142,10 @@ async function doDelete() {
             @click="openDetail(c.id)"
           >
             <td>
-              <div class="font-medium text-white">{{ c.name }}</div>
-              <div class="text-xs text-slate-500">{{ c.id }}</div>
+              <div class="font-medium text-slate-100">{{ c.name }}</div>
+              <div class="text-xs text-slate-600">{{ c.id }}</div>
             </td>
-            <td class="font-mono text-xs text-slate-300">{{ c.k8sVersion }}</td>
+            <td class="text-xs text-brand-300/80">{{ c.k8sVersion }}</td>
             <td class="text-slate-300">{{ c.region }}</td>
             <td class="text-slate-300">{{ c.nodeCount }}</td>
             <td>
@@ -154,7 +156,7 @@ async function doDelete() {
               <div class="inline-flex items-center gap-1">
                 <button
                   type="button"
-                  class="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                  class="rounded-sm p-1.5 text-slate-400 hover:bg-brand-500/10 hover:text-brand-300"
                   title="View"
                   @click="openDetail(c.id)"
                 >
@@ -162,7 +164,7 @@ async function doDelete() {
                 </button>
                 <button
                   type="button"
-                  class="rounded p-1.5 text-slate-400 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"
+                  class="rounded-sm p-1.5 text-slate-400 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"
                   title="Delete"
                   :disabled="c.status === 'Deleting' || c.status === 'Deleted'"
                   @click="askDelete(c.id, c.name)"

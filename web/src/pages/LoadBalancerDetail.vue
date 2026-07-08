@@ -130,15 +130,15 @@ const clusterName = computed(() => {
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div class="flex items-start gap-3">
         <button
-          class="mt-1 rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+          class="mt-1 rounded-sm p-1.5 text-slate-400 hover:bg-ink-800 hover:text-brand-300"
           @click="router.push({ name: 'loadbalancers' })"
         >
           <ArrowLeft class="h-4 w-4" />
         </button>
         <div>
           <div class="flex items-center gap-3">
-            <h1 class="text-2xl font-semibold text-white">
-              {{ lb?.name || '...' }}
+            <h1 class="text-xl font-semibold text-slate-100">
+              <span class="text-brand-400">#</span> {{ lb?.name || '...' }}
             </h1>
             <StatusBadge v-if="lb" :status="lb.status" />
           </div>
@@ -188,7 +188,7 @@ const clusterName = computed(() => {
           <Globe class="h-3.5 w-3.5" />
           Listen port
         </div>
-        <div class="mt-2 font-mono text-xl font-semibold text-white">
+        <div class="mt-2 text-xl font-semibold text-brand-300">
           {{ lb.port }}
         </div>
       </div>
@@ -199,7 +199,7 @@ const clusterName = computed(() => {
           <Server class="h-3.5 w-3.5" />
           Target port
         </div>
-        <div class="mt-2 font-mono text-xl font-semibold text-white">
+        <div class="mt-2 text-xl font-semibold text-brand-300">
           {{ lb.targetPort }}
         </div>
       </div>
@@ -210,7 +210,7 @@ const clusterName = computed(() => {
           <Shuffle class="h-3.5 w-3.5" />
           Algorithm
         </div>
-        <div class="mt-2 text-xl font-semibold capitalize text-white">
+        <div class="mt-2 text-xl font-semibold capitalize text-brand-300">
           {{ lb.algorithm.replace('_', ' ') }}
         </div>
       </div>
@@ -220,7 +220,7 @@ const clusterName = computed(() => {
         >
           Uptime
         </div>
-        <div class="mt-2 text-xl font-semibold text-white">
+        <div class="mt-2 text-xl font-semibold text-brand-300">
           {{ uptime(lb.createdAt) }}
         </div>
       </div>
@@ -271,7 +271,7 @@ const clusterName = computed(() => {
       </Card>
 
       <Card title="Backends" :description="`${lb.backends?.length ?? 0} total`">
-        <ul v-if="lb.backends?.length" class="divide-y divide-slate-800">
+        <ul v-if="lb.backends?.length" class="divide-y divide-ink-700">
           <li
             v-for="(b, i) in lb.backends"
             :key="`${b.host}-${b.port}-${i}`"

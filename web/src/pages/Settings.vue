@@ -18,16 +18,16 @@ function logout() {
 <template>
   <div class="space-y-6">
     <header>
-      <h1 class="text-2xl font-semibold text-white">Settings</h1>
-      <p class="mt-1 text-sm text-slate-400">
-        Manage your account and session.
-      </p>
+      <h1 class="text-xl font-semibold text-slate-100">
+        <span class="text-brand-400">#</span> settings
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">manage your account and session</p>
     </header>
 
     <Card title="Account">
       <div v-if="auth.user" class="flex items-start gap-4">
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-brand-500/10 text-brand-300 ring-1 ring-inset ring-brand-500/20"
+          class="flex h-12 w-12 items-center justify-center rounded-md bg-brand-500/10 text-brand-300 ring-1 ring-inset ring-brand-500/20"
         >
           <UserCircle class="h-7 w-7" />
         </div>

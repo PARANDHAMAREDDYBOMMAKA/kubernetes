@@ -99,9 +99,11 @@ async function doDelete() {
   <div class="space-y-6">
     <header class="flex flex-wrap items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-semibold text-white">Load Balancers</h1>
-        <p class="mt-1 text-sm text-slate-400">
-          HTTP/TCP load balancers routing traffic to your cluster workloads.
+        <h1 class="text-xl font-semibold text-slate-100">
+          <span class="text-brand-400">#</span> load balancers
+        </h1>
+        <p class="mt-1 text-sm text-slate-500">
+          http/tcp routing to your cluster workloads
         </p>
       </div>
       <div class="flex items-center gap-2">
@@ -147,12 +149,12 @@ async function doDelete() {
             @click="openDetail(lb.id)"
           >
             <td>
-              <div class="font-medium text-white">{{ lb.name }}</div>
-              <div class="text-xs text-slate-500">{{ lb.id }}</div>
+              <div class="font-medium text-slate-100">{{ lb.name }}</div>
+              <div class="text-xs text-slate-600">{{ lb.id }}</div>
             </td>
             <td class="text-slate-300">{{ clusterName(lb.clusterId) }}</td>
-            <td class="font-mono text-xs text-slate-300">
-              {{ lb.port }} → {{ lb.targetPort }}
+            <td class="text-xs text-brand-300/80">
+              {{ lb.port }} <span class="text-slate-600">→</span> {{ lb.targetPort }}
             </td>
             <td class="text-slate-300">{{ lb.algorithm }}</td>
             <td class="text-slate-300">{{ lb.backends?.length ?? 0 }}</td>
@@ -164,7 +166,7 @@ async function doDelete() {
               <div class="inline-flex items-center gap-1">
                 <button
                   type="button"
-                  class="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                  class="rounded-sm p-1.5 text-slate-400 hover:bg-brand-500/10 hover:text-brand-300"
                   title="View"
                   @click="openDetail(lb.id)"
                 >
@@ -172,7 +174,7 @@ async function doDelete() {
                 </button>
                 <button
                   type="button"
-                  class="rounded p-1.5 text-slate-400 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"
+                  class="rounded-sm p-1.5 text-slate-400 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"
                   title="Delete"
                   :disabled="lb.status === 'Deleting'"
                   @click="askDelete(lb.id, lb.name)"

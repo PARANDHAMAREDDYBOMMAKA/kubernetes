@@ -21,14 +21,14 @@ async function doCopy(code: string) {
 </script>
 
 <template>
-  <div class="relative rounded-lg border border-slate-800 bg-slate-950/80">
+  <div class="relative rounded-md border border-ink-700 bg-ink-950/80">
     <div
-      class="flex items-center justify-between border-b border-slate-800 px-3 py-2 text-xs text-slate-400"
+      class="flex items-center justify-between border-b border-ink-700 px-3 py-2 text-xs text-slate-400"
     >
-      <span class="uppercase tracking-wider">{{ language || 'yaml' }}</span>
+      <span class="uppercase tracking-wider text-brand-400/80">◆ {{ language || 'yaml' }}</span>
       <button
         type="button"
-        class="inline-flex items-center gap-1.5 rounded px-2 py-1 hover:bg-slate-800 hover:text-slate-200"
+        class="inline-flex items-center gap-1.5 rounded-sm px-2 py-1 hover:bg-ink-800 hover:text-brand-300"
         @click="doCopy(code)"
       >
         <component :is="copied ? Check : Copy" class="h-3.5 w-3.5" />

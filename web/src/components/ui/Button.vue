@@ -27,15 +27,15 @@ const props = withDefaults(
 const variantClass = computed(() => {
   switch (props.variant) {
     case 'primary':
-      return 'bg-brand-600 hover:bg-brand-500 text-white focus:ring-brand-500/60 shadow-glow'
+      return 'bg-brand-500 hover:bg-brand-400 text-ink-950 font-semibold focus:ring-brand-500/50 shadow-glow'
     case 'secondary':
-      return 'bg-slate-800 hover:bg-slate-700 text-slate-100 focus:ring-slate-500/60 border border-slate-700'
+      return 'bg-ink-800 hover:bg-ink-700 text-slate-100 focus:ring-brand-500/40 border border-ink-700'
     case 'ghost':
-      return 'bg-transparent hover:bg-slate-800 text-slate-200 focus:ring-slate-500/60'
+      return 'bg-transparent hover:bg-ink-800 text-slate-300 focus:ring-brand-500/40'
     case 'outline':
-      return 'bg-transparent hover:bg-slate-800/60 text-slate-100 border border-slate-700 focus:ring-slate-500/60'
+      return 'bg-transparent hover:bg-brand-500/10 hover:text-brand-300 text-slate-200 border border-ink-700 hover:border-brand-500/40 focus:ring-brand-500/40'
     case 'danger':
-      return 'bg-red-600 hover:bg-red-500 text-white focus:ring-red-500/60'
+      return 'bg-red-500/90 hover:bg-red-500 text-white focus:ring-red-500/50'
     default:
       return ''
   }

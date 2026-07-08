@@ -118,7 +118,7 @@ async function submit() {
           min="1"
           max="5"
           step="1"
-          class="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-800 accent-brand-500"
+          class="h-2 w-full cursor-pointer appearance-none rounded-full bg-ink-800 accent-brand-500"
         />
         <div class="mt-1 flex justify-between text-xs text-slate-500">
           <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>

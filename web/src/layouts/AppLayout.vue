@@ -8,7 +8,6 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronRight,
   Sun,
   Moon
 } from 'lucide-vue-next'
@@ -67,26 +66,26 @@ function toggleTheme() {
 </script>
 
 <template>
-  <div class="relative flex min-h-screen bg-slate-950">
+  <div class="term-grid relative flex min-h-screen bg-ink-950">
     <!-- mobile overlay -->
     <div
       v-if="sidebarOpen"
-      class="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-sm md:hidden"
+      class="fixed inset-0 z-30 bg-ink-950/70 backdrop-blur-sm md:hidden"
       @click="sidebarOpen = false"
     />
 
     <!-- Sidebar -->
     <aside
-      class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-slate-800 bg-slate-900/80 backdrop-blur transition-transform md:translate-x-0"
+      class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-ink-700 bg-ink-900/90 backdrop-blur transition-transform md:translate-x-0"
       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
     >
-      <div class="flex h-16 items-center justify-between px-5">
+      <div class="flex h-16 items-center justify-between border-b border-ink-700 px-5">
         <RouterLink
           to="/clusters"
-          class="flex items-center gap-2 font-semibold text-white"
+          class="group flex items-center gap-2.5 font-semibold text-slate-100"
         >
           <span
-            class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-glow"
+            class="flex h-8 w-8 items-center justify-center rounded-md border border-brand-500/40 bg-brand-500/10 text-brand-400 shadow-glow"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -101,52 +100,65 @@ function toggleTheme() {
               <circle cx="16" cy="16" r="2.2" fill="currentColor" stroke="none" />
             </svg>
           </span>
-          <span class="tracking-tight">KaaS</span>
+          <span class="flex flex-col leading-none">
+            <span class="text-sm tracking-tight"
+              ><span class="text-brand-400">$</span> kaas</span
+            >
+            <span class="mt-0.5 text-[10px] font-normal text-slate-500">v1 · k3s</span>
+          </span>
         </RouterLink>
         <button
           type="button"
-          class="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-100 md:hidden"
+          class="rounded-sm p-1 text-slate-500 hover:bg-ink-800 hover:text-brand-300 md:hidden"
           @click="sidebarOpen = false"
         >
           <X class="h-4 w-4" />
         </button>
       </div>
 
-      <nav class="flex-1 space-y-1 px-3 py-2">
+      <div class="px-4 pb-1 pt-4 text-[10px] uppercase tracking-widest text-slate-600">
+        navigation
+      </div>
+      <nav class="flex-1 space-y-0.5 px-3 py-1">
         <RouterLink
           v-for="item in nav"
           :key="item.name"
           :to="item.to"
-          class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition"
+          class="group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition"
           :class="
             isActive(item.match)
-              ? 'bg-brand-500/10 text-brand-200 ring-1 ring-inset ring-brand-500/20'
-              : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+              ? 'bg-brand-500/10 text-brand-300'
+              : 'text-slate-400 hover:bg-ink-800 hover:text-slate-100'
           "
           @click="sidebarOpen = false"
         >
+          <span
+            v-if="isActive(item.match)"
+            class="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-brand-400"
+          />
           <component :is="item.icon" class="h-4 w-4" />
           <span>{{ item.name }}</span>
         </RouterLink>
       </nav>
 
-      <div class="border-t border-slate-800 p-3">
+      <div class="border-t border-ink-700 p-3">
         <div
           v-if="auth.user"
-          class="mb-2 rounded-lg bg-slate-800/60 px-3 py-2"
+          class="mb-2 rounded-md border border-ink-700 bg-ink-850/60 px-3 py-2"
         >
-          <p class="truncate text-sm font-medium text-slate-100">
+          <p class="flex items-center gap-1.5 truncate text-sm font-medium text-slate-100">
+            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400" />
             {{ auth.user.name || auth.user.email }}
           </p>
-          <p class="truncate text-xs text-slate-400">{{ auth.user.email }}</p>
+          <p class="mt-0.5 truncate text-xs text-slate-500">{{ auth.user.email }}</p>
         </div>
         <button
           type="button"
-          class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-red-300"
+          class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-400 transition hover:bg-red-500/10 hover:text-red-300"
           @click="logout"
         >
           <LogOut class="h-4 w-4" />
-          Sign out
+          logout
         </button>
       </div>
     </aside>
@@ -155,34 +167,41 @@ function toggleTheme() {
     <div class="flex min-h-screen w-full flex-col md:pl-64">
       <!-- Topbar -->
       <header
-        class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-800 bg-slate-950/80 px-4 backdrop-blur sm:px-6"
+        class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-ink-700 bg-ink-950/85 px-4 backdrop-blur sm:px-6"
       >
         <button
           type="button"
-          class="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-100 md:hidden"
+          class="rounded-sm p-1.5 text-slate-400 hover:bg-ink-800 hover:text-brand-300 md:hidden"
           @click="sidebarOpen = true"
         >
           <Menu class="h-5 w-5" />
         </button>
-        <nav class="flex items-center gap-1 text-sm text-slate-400">
+        <nav class="flex items-center gap-1.5 text-sm text-slate-500">
+          <span class="text-brand-400/80">kaas</span>
+          <span class="text-slate-600">:</span>
           <template v-for="(bc, i) in breadcrumbs" :key="i">
-            <ChevronRight
-              v-if="i > 0"
-              class="h-3.5 w-3.5 text-slate-600"
-            />
+            <span v-if="i > 0" class="text-slate-600">/</span>
             <RouterLink
               v-if="bc.to"
               :to="bc.to"
-              class="hover:text-slate-200"
+              class="hover:text-brand-300"
               >{{ bc.label }}</RouterLink
             >
-            <span v-else class="font-medium text-slate-200">{{ bc.label }}</span>
+            <span v-else class="text-slate-200">{{ bc.label }}</span>
           </template>
+          <span class="animate-blink text-brand-400">▊</span>
         </nav>
-        <div class="ml-auto flex items-center gap-2">
+        <div class="ml-auto flex items-center gap-3">
+          <span
+            class="hidden items-center gap-1.5 text-xs text-slate-500 sm:flex"
+            title="API connected"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-brand-400" />
+            online
+          </span>
           <button
             type="button"
-            class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+            class="rounded-md p-2 text-slate-400 hover:bg-ink-800 hover:text-brand-300"
             :title="isDark ? 'Switch to light' : 'Switch to dark'"
             @click="toggleTheme"
           >

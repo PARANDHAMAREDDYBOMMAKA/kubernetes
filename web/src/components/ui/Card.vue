@@ -10,11 +10,11 @@ defineProps<{
   <section class="card-base">
     <header
       v-if="title || $slots.header || $slots.actions"
-      class="flex items-start justify-between gap-4 border-b border-slate-800 px-5 py-4"
+      class="flex items-start justify-between gap-4 border-b border-ink-700 px-5 py-4"
     >
       <div>
         <slot name="header">
-          <h3 v-if="title" class="text-sm font-semibold text-slate-100">
+          <h3 v-if="title" class="text-xs font-semibold uppercase tracking-wider text-slate-200">
             {{ title }}
           </h3>
           <p v-if="description" class="mt-0.5 text-xs text-slate-400">

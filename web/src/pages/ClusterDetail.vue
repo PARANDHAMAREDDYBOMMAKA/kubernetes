@@ -157,7 +157,7 @@ watch(activeTab, (t) => {
 })
 
 function nodeBadgeVariant(n: ClusterNode): string {
-  if (n.ready) return 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30'
+  if (n.ready) return 'bg-brand-500/10 text-brand-300 ring-brand-500/30'
   if (n.state === 'running' || n.state === 'created') return 'bg-amber-500/10 text-amber-200 ring-amber-500/30'
   return 'bg-rose-500/10 text-rose-300 ring-rose-500/30'
 }
@@ -237,15 +237,15 @@ const tabs = [
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div class="flex items-start gap-3">
         <button
-          class="mt-1 rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+          class="mt-1 rounded-sm p-1.5 text-slate-400 hover:bg-ink-800 hover:text-brand-300"
           @click="router.push({ name: 'clusters' })"
         >
           <ArrowLeft class="h-4 w-4" />
         </button>
         <div>
           <div class="flex items-center gap-3">
-            <h1 class="text-2xl font-semibold text-white">
-              {{ cluster?.name || '...' }}
+            <h1 class="text-xl font-semibold text-slate-100">
+              <span class="text-brand-400">#</span> {{ cluster?.name || '...' }}
             </h1>
             <StatusBadge v-if="cluster" :status="cluster.status" />
           </div>
@@ -319,7 +319,7 @@ const tabs = [
           <component :is="s.icon" class="h-3.5 w-3.5" />
           {{ s.label }}
         </div>
-        <div class="mt-2 text-xl font-semibold text-white">{{ s.value }}</div>
+        <div class="mt-2 text-xl font-semibold text-brand-300">{{ s.value }}</div>
       </div>
     </div>
 
@@ -337,23 +337,23 @@ const tabs = [
     <!-- Tabs -->
     <div
       v-if="cluster"
-      class="flex items-center gap-1 border-b border-slate-800"
+      class="flex items-center gap-1 border-b border-ink-700"
     >
       <button
         v-for="t in tabs"
         :key="t.id"
-        class="relative px-3 py-2 text-sm font-medium transition"
+        class="relative px-3 py-2 text-sm transition"
         :class="
           activeTab === t.id
-            ? 'text-white'
-            : 'text-slate-400 hover:text-slate-200'
+            ? 'text-brand-300'
+            : 'text-slate-500 hover:text-slate-200'
         "
         @click="activeTab = t.id"
       >
         {{ t.label }}
         <span
           v-if="activeTab === t.id"
-          class="absolute inset-x-0 -bottom-px h-0.5 rounded bg-brand-500"
+          class="absolute inset-x-0 -bottom-px h-0.5 rounded bg-brand-400"
         />
       </button>
     </div>
@@ -421,7 +421,7 @@ const tabs = [
               min="1"
               max="5"
               step="1"
-              class="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-800 accent-brand-500"
+              class="h-2 w-full cursor-pointer appearance-none rounded-full bg-ink-800 accent-brand-500"
             />
             <div class="mt-1 flex justify-between text-xs text-slate-500">
               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
@@ -537,14 +537,14 @@ const tabs = [
           {{ nodesError }}
         </div>
 
-        <div v-else-if="nodes.length === 0" class="rounded-lg border border-dashed border-slate-800 p-8 text-center">
+        <div v-else-if="nodes.length === 0" class="rounded-md border border-dashed border-ink-700 p-8 text-center">
           <Server class="mx-auto h-8 w-8 text-slate-600" />
           <p class="mt-3 text-sm text-slate-300">No nodes yet.</p>
         </div>
 
         <div v-else class="overflow-x-auto">
           <table class="w-full text-left text-sm">
-            <thead class="text-xs uppercase tracking-wider text-slate-500">
+            <thead class="text-[11px] uppercase tracking-wider text-brand-400/70">
               <tr>
                 <th class="py-2 pr-4">Name</th>
                 <th class="py-2 pr-4">Role</th>
@@ -554,19 +554,19 @@ const tabs = [
                 <th class="py-2 pr-4">Message</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800">
+            <tbody class="divide-y divide-ink-700">
               <tr v-for="n in nodes" :key="n.name" class="align-top">
-                <td class="py-3 pr-4 font-mono text-xs text-slate-200">{{ n.name }}</td>
+                <td class="py-3 pr-4 text-xs text-slate-200">{{ n.name }}</td>
                 <td class="py-3 pr-4 text-slate-300">{{ n.role }}</td>
                 <td class="py-3 pr-4">
                   <span
-                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
+                    class="inline-flex items-center rounded-sm px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide ring-1 ring-inset"
                     :class="nodeBadgeVariant(n)"
                   >
                     {{ nodeStatusLabel(n) }}
                   </span>
                 </td>
-                <td class="py-3 pr-4 font-mono text-xs text-slate-500">
+                <td class="py-3 pr-4 text-xs text-slate-500">
                   {{ n.containerId ? n.containerId.slice(0, 12) : '—' }}
                 </td>
                 <td class="py-3 pr-4 text-xs text-slate-400">

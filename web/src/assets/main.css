@@ -10,34 +10,59 @@
   }
   body {
     font-family:
-      Inter,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      Segoe UI,
-      Roboto,
-      sans-serif;
-    font-feature-settings:
-      'cv11',
-      'ss01';
+      'JetBrains Mono',
+      'IBM Plex Mono',
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace;
+    background-color: #05080a;
+    color: #cdd6d0;
+    font-feature-settings: 'zero' 1;
+    -webkit-font-smoothing: antialiased;
   }
   :root.dark {
     color-scheme: dark;
   }
   ::selection {
-    background: rgba(99, 102, 241, 0.35);
+    background: rgba(31, 224, 135, 0.3);
+    color: #eafff5;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.01em;
   }
 }
 
 @layer components {
   .input-base {
-    @apply w-full rounded-lg border border-slate-700/80 bg-slate-900/70 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 shadow-soft transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply w-full rounded-md border border-ink-700 bg-ink-950/80 px-3 py-2 text-sm text-slate-100 placeholder-slate-600 transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:opacity-60;
   }
   .card-base {
-    @apply rounded-xl border border-slate-800 bg-slate-900/60 shadow-soft;
+    @apply rounded-md border border-ink-700 bg-ink-900/70 shadow-term backdrop-blur-sm;
   }
   .btn-base {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-ink-950 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Terminal chrome helpers */
+  .term-grid {
+    @apply bg-grid;
+    background-size: 32px 32px;
+  }
+  .prompt::before {
+    content: '$ ';
+    @apply text-brand-400;
+  }
+  .caret::after {
+    content: '▊';
+    @apply ml-0.5 animate-blink text-brand-400;
+  }
+  .tag {
+    @apply inline-flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide;
   }
 }
 
@@ -50,21 +75,21 @@
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.18);
-  border-radius: 9999px;
+  background: rgba(31, 224, 135, 0.16);
+  border-radius: 2px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(31, 224, 135, 0.32);
 }
 
 /* skeleton */
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(30, 41, 59, 0.6) 0%,
-    rgba(51, 65, 85, 0.6) 50%,
-    rgba(30, 41, 59, 0.6) 100%
+    rgba(19, 27, 23, 0.7) 0%,
+    rgba(26, 36, 31, 0.9) 50%,
+    rgba(19, 27, 23, 0.7) 100%
   );
   background-size: 800px 100%;
-  @apply animate-shimmer rounded;
+  @apply animate-shimmer rounded-sm;
 }

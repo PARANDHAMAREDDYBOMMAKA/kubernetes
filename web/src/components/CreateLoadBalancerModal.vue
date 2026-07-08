@@ -205,7 +205,7 @@ async function submit() {
           <label class="text-xs font-medium text-slate-300">Backends</label>
           <button
             type="button"
-            class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-brand-300 hover:bg-slate-800"
+            class="inline-flex items-center gap-1 rounded-sm px-2 py-1 text-xs text-brand-300 hover:bg-ink-800"
             @click="addBackend"
           >
             <Plus class="h-3.5 w-3.5" />
@@ -214,7 +214,7 @@ async function submit() {
         </div>
         <p v-if="backendHint" class="mb-2 text-xs text-slate-500">
           Tip: for k8s NodePort services, use
-          <code class="rounded bg-slate-800 px-1 py-0.5 text-slate-300">{{ backendHint }}</code>
+          <code class="rounded-sm bg-ink-800 px-1 py-0.5 text-brand-300">{{ backendHint }}</code>
           as host and the NodePort (30000–32767) as port.
         </p>
         <div class="space-y-2">
@@ -239,7 +239,7 @@ async function submit() {
             />
             <button
               type="button"
-              class="rounded p-2 text-slate-400 hover:bg-red-500/10 hover:text-red-300"
+              class="rounded-sm p-2 text-slate-400 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"
               :disabled="form.backends.length === 1"
               @click="removeBackend(i)"
             >

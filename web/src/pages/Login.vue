@@ -34,12 +34,12 @@ async function onSubmit() {
 
 <template>
   <div
-    class="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12"
+    class="term-grid flex min-h-screen items-center justify-center bg-ink-950 px-4 py-12"
   >
     <div class="w-full max-w-md">
-      <div class="mb-8 flex items-center justify-center gap-2 text-white">
+      <div class="mb-6 flex items-center justify-center gap-2.5 text-slate-100">
         <span
-          class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 shadow-glow"
+          class="flex h-9 w-9 items-center justify-center rounded-md border border-brand-500/40 bg-brand-500/10 text-brand-400 shadow-glow"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -54,18 +54,33 @@ async function onSubmit() {
             <circle cx="16" cy="16" r="2.2" fill="currentColor" stroke="none" />
           </svg>
         </span>
-        <span class="text-lg font-semibold">KaaS</span>
+        <span class="text-lg font-semibold"
+          ><span class="text-brand-400">$</span> kaas</span
+        >
       </div>
 
-      <div class="card-base p-8 animate-fade-in">
-        <div class="mb-6">
-          <h1 class="text-xl font-semibold text-white">Sign in</h1>
-          <p class="mt-1 text-sm text-slate-400">
-            Welcome back. Access your managed Kubernetes clusters.
-          </p>
+      <div class="card-base animate-fade-in overflow-hidden">
+        <!-- terminal title bar -->
+        <div
+          class="flex items-center gap-2 border-b border-ink-700 bg-ink-850/60 px-4 py-2.5"
+        >
+          <span class="h-2.5 w-2.5 rounded-full bg-red-500/70" />
+          <span class="h-2.5 w-2.5 rounded-full bg-amber-500/70" />
+          <span class="h-2.5 w-2.5 rounded-full bg-brand-500/70" />
+          <span class="ml-2 text-xs text-slate-500">login.sh</span>
         </div>
 
-        <form class="space-y-4" @submit.prevent="onSubmit">
+        <div class="p-8">
+          <div class="mb-6">
+            <p class="text-xs text-slate-500">
+              <span class="text-brand-400">➜</span> authenticate to continue
+            </p>
+            <h1 class="mt-1 text-lg font-semibold text-slate-100">
+              sign in<span class="animate-blink text-brand-400">▊</span>
+            </h1>
+          </div>
+
+          <form class="space-y-4" @submit.prevent="onSubmit">
           <Input
             id="email"
             v-model="email"
@@ -96,14 +111,15 @@ async function onSubmit() {
           </Button>
         </form>
 
-        <p class="mt-6 text-center text-sm text-slate-400">
-          Don't have an account?
-          <RouterLink
-            to="/register"
-            class="font-medium text-brand-300 hover:text-brand-200"
-            >Create one</RouterLink
-          >
-        </p>
+          <p class="mt-6 text-center text-sm text-slate-500">
+            no account?
+            <RouterLink
+              to="/register"
+              class="font-medium text-brand-400 hover:text-brand-300"
+              >create one →</RouterLink
+            >
+          </p>
+        </div>
       </div>
     </div>
   </div>

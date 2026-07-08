@@ -22,7 +22,7 @@ function iconFor(kind: string) {
 function toneClass(kind: string) {
   switch (kind) {
     case 'success':
-      return 'border-emerald-600/40 bg-emerald-500/10 text-emerald-100'
+      return 'border-brand-600/40 bg-brand-500/10 text-brand-100'
     case 'error':
       return 'border-red-600/40 bg-red-500/10 text-red-100'
     case 'warning':
@@ -35,7 +35,7 @@ function toneClass(kind: string) {
 function iconColor(kind: string) {
   switch (kind) {
     case 'success':
-      return 'text-emerald-400'
+      return 'text-brand-400'
     case 'error':
       return 'text-red-400'
     case 'warning':
@@ -55,7 +55,7 @@ function iconColor(kind: string) {
         <div
           v-for="t in toasts"
           :key="t.id"
-          class="pointer-events-auto w-full max-w-sm rounded-lg border bg-slate-900/95 px-4 py-3 shadow-lg backdrop-blur animate-fade-in"
+          class="pointer-events-auto w-full max-w-sm rounded-md border bg-ink-900/95 px-4 py-3 shadow-lg shadow-black/50 backdrop-blur animate-fade-in"
           :class="toneClass(t.kind)"
         >
           <div class="flex items-start gap-3">
@@ -72,7 +72,7 @@ function iconColor(kind: string) {
             </div>
             <button
               type="button"
-              class="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+              class="rounded-sm p-1 text-slate-400 hover:bg-ink-800 hover:text-slate-200"
               @click="store.dismiss(t.id)"
             >
               <X class="h-3.5 w-3.5" />
